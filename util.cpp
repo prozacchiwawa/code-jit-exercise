@@ -24,6 +24,6 @@ uint8_t *get_overflow_code_page(uint32_t code) {
 	}
 	last = &overflow[overflow.size() - 1];
 	auto where = (*last)->offset;
-	(*last)->offset + code;
+	(*last)->offset += code;
 	return (*last)->translated_code + where;
 }

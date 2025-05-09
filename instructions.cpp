@@ -69,8 +69,8 @@ void translate_insn(cpu_t *cpu, translation_t *translation_page, uint32_t addr) 
 void initialize_translate_code() {
   uint8_t bytes[] = {
     /*9e:*/	0x5a, //                   	pop    %rdx
-    /*9f:*/	0x49, 0x89, 0xd0, //             	mov    %rdx,%r8
     /*a2:*/	0x48, 0x83, 0xea, 0x06, //          	sub    $0x6,%rdx
+    /*9f:*/	0x49, 0x89, 0xd0, //             	mov    %rdx,%r8
     /*a3:*/	0x4c, 0x8b, 0xa2, 0x00, 0x40, 0x00, 0x00, // 	mov    0x4000(%rdx),%r12
     /*ad:*/	0x4d, 0x89, 0xe5, //             	mov    %r12,%r13
     /*b1:*/	0x49, 0xc1, 0xe4, 0x02, //          	shl    $0x2,%r12
@@ -83,10 +83,16 @@ void initialize_translate_code() {
     /*ca:*/	0x57, //                   	push   %rdi
     /*cb:*/	0x56, //                   	push   %rsi
     /*cc:*/	0x52, //                   	push   %rdx
+    /*cb:*/	0x41, 0x50, //                	push   %r8
     /*cd:*/	0x4c, 0x89, 0xcf, //             	mov    %r9,%rdi
     /*d0:*/	0x4c, 0x89, 0xde, //             	mov    %r11,%rsi
     /*d1:*/	0x4c, 0x89, 0xea, //             	mov    %r13,%rdx
     /*ce:*/	0x41, 0xff, 0x51, 0x50, //          	call   *0x18(%r9)
+    /*da:*/	0x41, 0x58, //                	pop    %r8
+    /*d8:*/	0x5a, //                   	pop    %rdx
+    /*d9:*/	0x5e, //                   	pop    %rsi
+    /*da:*/	0x5f, //                   	pop    %rdi
+    /*db:*/	0x41, 0xff, 0xe0, //             	jmp    *%r8
   };
 
   if (!use_translate_code) {

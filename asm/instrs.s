@@ -87,9 +87,17 @@ translate_insn:
   push %rdi /* set up arguments for translate_insn */
   push %rsi
   push %rdx
+  push %r8
   movq %r9, %rdi
   movq %r11, %rsi
   movq %r13, %rdx
 
   /* call translate */
   callq *0x50(%r9)
+
+  pop %r8
+  pop %rdx
+  pop %rsi
+  pop %rdi
+
+  jmp *%r8
