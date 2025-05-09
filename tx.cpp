@@ -1,0 +1,27 @@
+#include <stdio.h>
+#include <stdint.h>
+#include "constants.h"
+#include "translation.h"
+#include "instructions.h"
+#include "memory.h"
+
+int main(int argc, char **argv) {
+  initialize_translate_code();
+  uint8_t bytes[] = {
+    0xd0 | (2 << 3), 0x00, // add instruction
+    0x67, 0xfe, // beq -2
+  };
+
+  for (auto i = 0; i < sizeof(bytes); i++) {
+    write_byte(0x1000, bytes[i]);
+  }
+
+  // Put a value in memory.
+  write_byte(0x2001, 3);
+
+  cpu_t cpu;
+  cpu.d_regs[0] = 1;
+  cpu.a_regs[0] = 0x2000;
+
+  cpu.run_code(&cpu, 0x1000);
+}
