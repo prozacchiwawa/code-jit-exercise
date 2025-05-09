@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
   }
 
   // Put a value in memory.
-  write_byte(0x2001, 3);
+  write_byte(0x2000, 3);
 
   cpu_t cpu;
   cpu.d_regs[0] = 1;

@@ -5,18 +5,20 @@
   .globl add_dn_eq_dn_plus_ea_byte
 add_dn_eq_dn_plus_ea_byte:
   pop %rax
-  addq 16384, %rax
-  movq %rax, %r8
-
-  movq %rbx, %rdi
-  movl 64(%rbx), %esi
-  movl 68(%rbx), %edi
-  callq *72(%rcx)
-  addl %esi,%eax
-  movl 64(%rbx), %eax
+  subq $6, %rax
+  movq 16384(%rax), %r8 /* Get the next address */
+  movq %rdi, %rbx
+  push %rdi
+  movl 33(%rbx), %edi /* read the a register */
+  callq *0x48(%rbx) /* call read byte */
+  pop %rdi
+  movl 77(%rbx), %edx /* read d<n> */
+  addl %edx, %eax
+  movl %eax, 77(%rbx) /* write d<n> */
+  movl $4, %eax
+  orl %eax, 68(%rbx) /* set zf */
   jz end_add_dn_eq_dn_plus_ea_byte
-  movl 4, %eax
-  orl %eax, 88(%rbx)
+  xorl %eax, 68(%rbx) /* unset zf */
 end_add_dn_eq_dn_plus_ea_byte:
   jmpq *%r8
 

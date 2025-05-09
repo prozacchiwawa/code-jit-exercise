@@ -127,18 +127,22 @@ void translate::write(translation_t *translation_page, uint32_t target_on_page) 
 void add_dn_eq_dn_plus_ea_byte::write(translation_t *translation, uint32_t page_addr) const {
  {
     uint8_t bytes[] = {
-      /*0:*/	0x4c, 0x89, 0x44, 0x24, 0x08, //       	mov    %r8,0x8(%rsp)
-      /*5:*/	0x48, 0x89, 0xdf, //             	mov    %rbx,%rdi
-      /*8:*/	0x8b, 0x73, 0x40, //             	mov    0x40(%rbx),%esi
-      /*b:*/	0x8b, 0x7b, 0x44, //             	mov    0x44(%rbx),%edi
-      /*e:*/	0xff, 0x51, 0x48, //             	call   *0x48(%rcx)
-      /*11:*/	0x01, 0xf0, //                	add    %esi,%eax
-      /*13:*/	0x8b, 0x43, 0x40, //             	mov    0x40(%rbx),%eax
-      /*16:*/	0x74, 0x0a, //                	je     22 <end_add_dn_eq_dn_plus_ea_byte>
-      /*18:*/	0x8b, 0x04, 0x25, 0x04, 0x00, 0x00, 0x00, // 	mov    0x4,%eax
-      /*1f:*/	0x09, 0x43, 0x58, //             	or     %eax,0x58(%rbx)
-      //0000000000000022 <end_add_dn_eq_dn_plus_ea_byte>:
-      /*22:*/	0x41, 0xff, 0xe0 //             	jmp    *%r8
+      /*0:*/	0x58, //                   	pop    %rax
+      /*1:*/	0x48, 0x83, 0xe8, 0x06, //         	sub    $0x6,%rax
+      /*9:*/	0x4c, 0x8b, 0x80, 0x00, 0x40, 0x00, 0x00, //	mov    0x4000(%rax),%r8
+      /*c:*/	0x48, 0x89, 0xfb, //             	mov    %rdi,%rbx
+      /*12:*/	0x57, //                   	push   %rdi
+      /*13:*/	0x8b, 0x7b, 0x21, //            	mov    0x21(%rbx),%edi
+      /*16:*/	0xff, 0x53, 0x48, //            	call   *0x48(%rbx)
+      /*16:*/	0x5f, //                   	pop    %rdi
+      /*19:*/	0x8b, 0x53, 0x4d, //            	mov    0x4d(%rbx),%edx
+      /*1a:*/	0x01, 0xd0, //                	add    %edx,%eax
+      /*1c:*/	0x89, 0x43, 0x4d, //             	mov    %eax,0x4d(%rbx)
+      /*1d:*/	0xb8, 0x04, 0x00, 0x00, 0x00, //      	mov    $0x4,%eax
+      /*28:*/	0x09, 0x43, 0x44, //            	or     %eax,0x44(%rbx)
+      /*2b:*/	0x74, 0x03, //               	jne    30 <end_add_dn_eq_dn_plus_ea_byte>
+      /*2d:*/	0x31, 0x43, 0x44, //            	xor    %eax,0x44(%rbx)
+      /*30:*/	0x41, 0xff, 0xe0, //            	jmp    *%r8
     };
 
     auto target = get_overflow_code_page(sizeof(bytes));
@@ -147,16 +151,15 @@ void add_dn_eq_dn_plus_ea_byte::write(translation_t *translation, uint32_t page_
     // Write in 1 byte at +15 (offsetof read_byte)
     // Write in 1 byte at +33 (offsetof flags)
     memcpy(target, bytes, sizeof(bytes));
-    target[10] = dn * 4;
-    target[13] = 32 + (an * 4);
-    target[15] = 68 + 8;
-    target[33] = 64;
+    target[0x12] = 32 + (an * 4);
+    target[0x19] = dn * 4;
+    target[0x1e] = dn * 4;
 
     memcpy(translation->data_for_translation(OVERFLOW_TR, page_addr), (uint8_t *)&target, sizeof(target));
 
     auto return_target = translation->data_for_translation(CODE_TR, page_addr + 2);
     auto return_ptr = translation->data_for_translation(NEXT_TR, page_addr);
-    memcpy(return_ptr, return_target, sizeof(return_target));
+    memcpy(return_ptr, &return_target, sizeof(return_target));
   }
 }
 
