@@ -6,19 +6,18 @@
 uint8_t *use_translate_code;
 
 void translate_insn(cpu_t *cpu, translation_t *translation_page, uint32_t addr) {
-  uint8_t source[2];
+  uint16_t source;
   cpu->pc = translation_page->address + addr;
-  source[0] = cpu->read_byte(cpu->pc);
-  source[1] = cpu->read_byte(cpu->pc + 1);
+  source = (cpu->read_byte(cpu->pc) << 8) | cpu->read_byte(cpu->pc + 1);
 
   std::unique_ptr<instr> instr = std::make_unique<no_translation>();
   int8_t branch_target;
 
-  switch (source[0] >> 4) {
+  switch (source >> 12) {
   case 0x6: // branch
-    switch (source[0] & 15) {
+    switch (source & 0xf00) {
     case 7:
-      branch_target = (int8_t)source[1];
+      branch_target = (int8_t)source & 0xff;
       instr.reset(new beq_local(branch_target));
       break;
 
@@ -29,12 +28,12 @@ void translate_insn(cpu_t *cpu, translation_t *translation_page, uint32_t addr) 
     break;
 
   case 0xd: // add
-    switch ((source[0] >> 6) & 7) {
+    switch ((source >> 6) & 7) {
     case 0:
-      switch ((source[0] >> 3) & 7) {
+      switch ((source >> 3) & 7) {
       case 2:
         // dn = (am) + dn
-        instr.reset(new add_dn_eq_dn_plus_ea_byte((source[0] >> 9) & 7, source[0] & 7));
+        instr.reset(new add_dn_eq_dn_plus_ea_byte((source >> 9) & 7, source & 7));
         break;
 
       default:

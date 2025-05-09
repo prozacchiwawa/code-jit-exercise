@@ -19,7 +19,7 @@ void write_byte(uint32_t b, uint8_t data) {
 
 uint32_t read_byte(uint32_t b) {
   auto page_addr = b & ~0xfff;
-  auto found = memory.find(b);
+  auto found = memory.find(page_addr);
   if (found != memory.end()) {
     return found->second[b & 0xfff];
   }
