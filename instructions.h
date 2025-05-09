@@ -6,7 +6,6 @@
 #include "constants.h"
 #include "util.h"
 #include "translation.h"
-#include "code_interface.h"
 
 class translation_t;
 class cpu_t;
