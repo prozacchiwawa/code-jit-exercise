@@ -47,10 +47,20 @@ public:
 };
 
 class beq_local : public instr {
- public:
+public:
   int relative_target;
 
   beq_local(int relative_target) : relative_target(relative_target) { }
+
+  bool in_place() const { return false; }
+  void write(translation_t *translation, uint32_t page_addr) const;
+};
+
+class bne_local : public instr {
+public:
+  int relative_target;
+
+  bne_local(int relative_target) : relative_target(relative_target) { }
 
   bool in_place() const { return false; }
   void write(translation_t *translation, uint32_t page_addr) const;

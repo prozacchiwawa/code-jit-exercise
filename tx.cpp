@@ -9,7 +9,7 @@ int main(int argc, char **argv) {
   initialize_translate_code();
   uint8_t bytes[] = {
     0xd0, (2 << 3), // add instruction
-    0x67, 0xfe, // beq -2
+    0x66, 0xfe, // beq -2
   };
 
   for (auto i = 0; i < sizeof(bytes); i++) {

@@ -25,16 +25,13 @@ end_add_dn_eq_dn_plus_ea_byte:
   .globl beq_local
 beq_local:
   pop %rax
-  addq 16384, %rax
-  movq %rax, %r8
+  subq $6, %rax
 
-  movl 4, %eax
-  testl 88(%rbx), %eax
+  testl $4, 68(%rdi)
   jz dont_branch_beq_local
-  movl 0xaabbccdd, %eax
-  addq %rax, %r8
+  jmpq *16384(%rax)
 dont_branch_beq_local:
-  jmpq *%r8
+  jmpq *8(%rax)
 
   .globl beq
 beq:

@@ -15,10 +15,15 @@ void translate_insn(cpu_t *cpu, translation_t *translation_page, uint32_t addr) 
 
   switch (source >> 12) {
   case 0x6: // branch
-    switch (source & 0xf00) {
+    switch ((source >> 8) & 0xf) {
     case 7:
       branch_target = (int8_t)source & 0xff;
       instr.reset(new beq_local(branch_target));
+      break;
+
+    case 6:
+      branch_target = (int8_t)source & 0xff;
+      instr.reset(new bne_local(branch_target));
       break;
 
     default:
@@ -165,27 +170,42 @@ void add_dn_eq_dn_plus_ea_byte::write(translation_t *translation, uint32_t page_
 
 void beq_local::write(translation_t *translation, uint32_t page_addr) const {
   uint8_t bytes[] = {
-    /*25:*/	0x4c, 0x89, 0x44, 0x24, 0x08, //       	mov    %r8,0x8(%rsp)
-    /*2a:*/	0x8b, 0x04, 0x25, 0x04, 0x00, 0x00, 0x00, // 	mov    0x4,%eax
-    /*31:*/	0x85, 0x43, 0x58, //             	test   %eax,0x58(%rbx)
-    /*34:*/	0x74, 0x0c, //                	je     42 <dont_branch_beq_local>
-    /*36:*/	0xa1, 0xdd, 0xcc, 0xbb, 0xaa, 0x00, 0x00, // 	movabs 0xaabbccdd,%eax
-    /*3d:*/	0x00, 0x00,
-    /*3f:*/	0x49, 0x01, 0xc0, //             	add    %rax,%r8
-    //0000000000000042 <dont_branch_beq_local>:
-    /*42:*/	0x41, 0xff, 0xe0 //             	jmp    *%r8
+    /*2f:*/	0x58, //                   	pop    %rax
+    /*30:*/	0x48, 0x83, 0xe8, 0x06, //         	sub    $0x6,%rax
+    /*34:*/	0xf7, 0x47, 0x44, 0x04, 0x00, 0x00, 0x00, //	testl  $0x4,0x44(%rdi)
+    /*3c:*/	0x74, 0x06, //               	je     44 <dont_branch_beq_local>
+    /*3e:*/	0xff, 0xa0, 0x00, 0x40, 0x00, 0x00, //   	jmp    *0x7ffa(%rax)
+    /*43:*/	0xff, 0x60, 0x08, //             	jmp    *0x8(%rax)
   };
 
   auto target = get_overflow_code_page(sizeof(bytes));
-  // Write in 1 byte at 14 (offsetof flags)
-  // Write in 4 bytes at 17 (target relative to following instruction)
   memcpy(target, bytes, sizeof(bytes));
-  target[14] = 68;
-  target[17] = relative_target;
-  target[18] = relative_target >> 8;
-  target[19] = relative_target >> 16;
-  target[20] = relative_target >> 24;
+
   memcpy(translation->data_for_translation(OVERFLOW_TR, page_addr), (uint8_t *)&target, sizeof(target));
+
+  auto return_target = translation->data_for_translation(CODE_TR, page_addr + relative_target);
+  auto return_ptr = translation->data_for_translation(NEXT_TR, page_addr);
+  memcpy(return_ptr, &return_target, sizeof(return_target));
+}
+
+void bne_local::write(translation_t *translation, uint32_t page_addr) const {
+  uint8_t bytes[] = {
+    /*2f:*/	0x58, //                   	pop    %rax
+    /*30:*/	0x48, 0x83, 0xe8, 0x06, //         	sub    $0x6,%rax
+    /*34:*/	0xf7, 0x47, 0x44, 0x04, 0x00, 0x00, 0x00, //	testl  $0x4,0x44(%rdi)
+    /*3c:*/	0x74, 0x03, //               	je     44 <dont_branch_beq_local>
+    /*43:*/	0xff, 0x60, 0x08, //             	jmp    *0x8(%rax)
+    /*3e:*/	0xff, 0xa0, 0x00, 0x40, 0x00, 0x00, //   	jmp    *0x7ffa(%rax)
+  };
+
+  auto target = get_overflow_code_page(sizeof(bytes));
+  memcpy(target, bytes, sizeof(bytes));
+
+  memcpy(translation->data_for_translation(OVERFLOW_TR, page_addr), (uint8_t *)&target, sizeof(target));
+
+  auto return_target = translation->data_for_translation(CODE_TR, page_addr + relative_target);
+  auto return_ptr = translation->data_for_translation(NEXT_TR, page_addr);
+  memcpy(return_ptr, &return_target, sizeof(return_target));
 }
 
 void indirect::write(translation_t *translation, uint32_t page_addr) const {
