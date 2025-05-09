@@ -147,6 +147,10 @@ void add_dn_eq_dn_plus_ea_byte::write(translation_t *translation, uint32_t page_
     target[33] = 64;
 
     memcpy(translation->data_for_translation(OVERFLOW_TR, page_addr), (uint8_t *)&target, sizeof(target));
+
+    auto return_target = translation->data_for_translation(CODE_TR, page_addr + 2);
+    auto return_ptr = translation->data_for_translation(NEXT_TR, page_addr);
+    memcpy(return_ptr, return_target, sizeof(return_target));
   }
 }
 
