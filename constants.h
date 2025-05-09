@@ -2,7 +2,7 @@
 #define CONSTANTS_H
 
 constexpr int TLB_SIZE = 4;
-constexpr int TRANSLATION_SIZE = 8 + 3 * 8 * 2048;
+constexpr int TRANSLATION_SIZE = 16 + 3 * 8 * 2048;
 constexpr int TARGET_INSTR_SHIFT = 1;
 constexpr int HOST_INSTR_SHIFT = 3;
 constexpr int PAGE_MASK = 0xfff;

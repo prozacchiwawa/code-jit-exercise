@@ -73,6 +73,7 @@ translate_insn:
 
   /* find the next pointer */
   movq 16384(%rdx), %r12
+  movq %r12, %r13
   shlq $2, %r12
   neg %r12
   sub $16, %r12
@@ -88,6 +89,7 @@ translate_insn:
   push %rdx
   movq %r9, %rdi
   movq %r11, %rsi
+  movq %r13, %rdx
 
   /* call translate */
   callq *0x50(%r9)

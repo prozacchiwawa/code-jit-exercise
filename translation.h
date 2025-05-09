@@ -11,8 +11,9 @@ class cpu_t;
 class translation_t {
 public:
   uint8_t *code_and_targets;
+  uint32_t address;
 
-	translation_t(cpu_t *cpu);
+	translation_t(cpu_t *cpu, uint32_t address);
 
   // Get a pointer to part of the translation info relating to the given
   // in-page address.

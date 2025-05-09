@@ -9,9 +9,7 @@ translation_t *get_translation(cpu_t *cpu, uint32_t page_addr) {
   auto found = translations.find(page);
   translation_t *t;
   if (found == translations.end()) {
-    t = new translation_t(cpu);
-    memcpy(t->code_and_targets, &cpu, sizeof(cpu));
-    memcpy(t->code_and_targets + sizeof(void *), t, sizeof(t));
+    t = new translation_t(cpu, page_addr);
     translations.insert(std::make_pair(page, t));
   } else {
     t = found->second;
@@ -19,14 +17,16 @@ translation_t *get_translation(cpu_t *cpu, uint32_t page_addr) {
   return t;
 }
 
-translation_t::translation_t(cpu_t *cpu) : code_and_targets(nullptr) {
+translation_t::translation_t(cpu_t *cpu, uint32_t page_addr) : code_and_targets(nullptr), address(page_addr) {
   this->code_and_targets = allocate_executable_code(TRANSLATION_SIZE);
   if (this->code_and_targets == MAP_FAILED) {
     abort();
   }
 
-  // The beginning of the range contains the cpu.
+  // The beginning of the range contains the cpu and self pointers.
   memcpy(this->code_and_targets, &cpu, sizeof(cpu));
+  auto this_ptr = this;
+  memcpy(this->code_and_targets + 8, &this_ptr, sizeof(this_ptr));
 
   // Fill the page with calls to translate.
   auto translate_insn = translate();
