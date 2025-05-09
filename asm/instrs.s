@@ -67,18 +67,19 @@ indirect_instr:
 
   .globl translate_insn
 translate_insn:
-  pop %rax /* enter with pc on the stack */
-  movq %rax, %r8 /* retrieve the cpu pointer */
+  pop %rdx /* enter with pc on the stack */
+  movq %rdx, %r8
+  subq $6, %rdx
 
-  /* load in-page offset from the next pointer */
-  movq NEXT_ADDR(%rip), %rdx
-  movq %rdx, %r12
+  /* find the next pointer */
+  movq 16384(%rdx), %r12
   shlq $2, %r12
   neg %r12
-  sub %r12, 16
+  sub $16, %r12
+  add %rdx, %r12
 
   /* rbx now points to the beginning of this translation block */
-  movq %rbx, %r12
+  movq %r12, %rbx
 
   movq (%rbx), %r9 /* pc based offset to the start of the object, containing the cpu pointer */
   movq 8(%rbx), %r11 /* pc based offset to the start of the object, containing a self pointer */
@@ -89,4 +90,4 @@ translate_insn:
   movq %r11, %rsi
 
   /* call translate */
-  callq *TRANSL_ADDR(%rip)
+  callq *0x50(%r9)

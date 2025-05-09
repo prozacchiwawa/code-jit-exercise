@@ -68,35 +68,34 @@ void translate_insn(cpu_t *cpu, translation_t *translation_page, uint32_t addr) 
 //   - subtracts 8 * ((pc & 0xfff) / 2)
 void initialize_translate_code() {
   uint8_t bytes[] = {
-    /*9e:*/	0x58, //                   	pop    %rax
-    /*9f:*/	0x49, 0x89, 0xc0, //             	mov    %rax,%r8
-    /*a2:*/	0x48, 0x8b, 0x15, 0x00, 0x00, 0x00, 0x00, // 	mov    0x0(%rip),%rdx        # a9 <translate_insn+0xb>
-    /*a9:*/	0x49, 0x89, 0xd4, //             	mov    %rdx,%r12
-    /*ac:*/	0x49, 0xc1, 0xe4, 0x02, //          	shl    $0x2,%r12
-    /*b0:*/	0x49, 0xf7, 0xdc, //             	neg    %r12
-    /*b3:*/	0x4c, 0x29, 0x24, 0x25, 0x10, 0x00, 0x00, // 	sub    %r12,0x10
-    /*ba:*/	0x00,
-    /*bb:*/	0x49, 0x89, 0xdc, //             	mov    %rbx,%r12
-    /*be:*/	0x4c, 0x8b, 0x0b, //             	mov    (%rbx),%r9
-    /*c1:*/	0x4c, 0x8b, 0x5b, 0x08, //          	mov    0x8(%rbx),%r11
-    /*c5:*/	0x57, //                   	push   %rdi
-    /*c6:*/	0x56, //                   	push   %rsi
-    /*c7:*/	0x52, //                   	push   %rdx
-    /*c8:*/	0x4c, 0x89, 0xcf, //             	mov    %r9,%rdi
-    /*cb:*/	0x4c, 0x89, 0xde, //             	mov    %r11,%rsi
-    /*ce:*/	0xff, 0x15, 0x00, 0x00, 0x00, 0x00, //    	call   *0x0(%rip)        # d4 <translate_insn+0x36>
+    /*9e:*/	0x5a, //                   	pop    %rdx
+    /*9f:*/	0x49, 0x89, 0xd0, //             	mov    %rdx,%r8
+    /*a2:*/	0x48, 0x83, 0xea, 0x06, //          	sub    $0x6,%rdx
+    /*a3:*/	0x4c, 0x8b, 0xa2, 0x00, 0x40, 0x00, 0x00, // 	mov    0x4000(%rdx),%r12
+    /*b1:*/	0x49, 0xc1, 0xe4, 0x02, //          	shl    $0x2,%r12
+    /*b5:*/	0x49, 0xf7, 0xdc, //             	neg    %r12
+    /*b1:*/	0x49, 0x83, 0xec, 0x10, //          	sub    $0x10,%r12
+    /*b5:*/	0x49, 0x01, 0xd4, //             	add    %rdx,%r12
+    /*b8:*/	0x4c, 0x89, 0xe3, //             	mov    %r12,%rbx
+    /*c3:*/	0x4c, 0x8b, 0x0b, //             	mov    (%rbx),%r9
+    /*c6:*/	0x4c, 0x8b, 0x5b, 0x08, //          	mov    0x8(%rbx),%r11
+    /*ca:*/	0x57, //                   	push   %rdi
+    /*cb:*/	0x56, //                   	push   %rsi
+    /*cc:*/	0x52, //                   	push   %rdx
+    /*cd:*/	0x4c, 0x89, 0xcf, //             	mov    %r9,%rdi
+    /*d0:*/	0x4c, 0x89, 0xde, //             	mov    %r11,%rsi
+    /*ce:*/	0x41, 0xff, 0x51, 0x50, //          	call   *0x18(%r9)
   };
 
   if (!use_translate_code) {
     use_translate_code = get_overflow_code_page(sizeof(bytes));
     memcpy(use_translate_code, bytes, sizeof(bytes));
-    uintptr_t translate_code_addr = (uintptr_t)::translate_insn;
   }
 }
 
 void translate::write(translation_t *translation_page, uint32_t target_on_page) const {
     uint8_t bytes[] = {
-      /*89:*/	0xff, 0x25, 0x00, 0x00, 0x00, 0x00, //    	jmp    *0x0(%rip)        # 8f <indirect_instr+0x6>
+      /*89:*/	0xff, 0x15, 0x00, 0x00, 0x00, 0x00, //    	call    *0x0(%rip)        # 8f <indirect_instr+0x6>
     };
 
     // Use the translated address to target code to call the translation function.
