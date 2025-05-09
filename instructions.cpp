@@ -61,7 +61,7 @@ void translate_insn(cpu_t *cpu, translation_t *translation_page, uint32_t addr) 
 // We start with
 // - primary code = indirect call
 // - overflow points to proxy to call translate_insn
-// - next = low 52 bits of rip, 12 bits of pc.
+// - next = 12 bits of pc
 //
 // The translation code
 //   - synthesizes pc
