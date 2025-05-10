@@ -21,11 +21,11 @@ public:
 
 class trap : public instr {
 public:
+  int code;
+
+  trap(int code) : code(code) { }
   bool in_place() const { return false; }
-  void write(uint8_t *target, int dn, int an) const {
-    // Implement me.
-    abort();
-  }
+  void write(translation_t *page, uint32_t page_addr) const;
 };
 
 class no_translation : public instr {

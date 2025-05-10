@@ -13,12 +13,10 @@ add_dn_eq_dn_plus_ea_byte:
   callq *0x48(%rbx) /* call read byte */
   pop %rdi
   movl 77(%rbx), %edx /* read d<n> */
+  orl $4, 68(%rbx)
   addl %edx, %eax
-  movl %eax, 77(%rbx) /* write d<n> */
-  movl $4, %eax
-  orl %eax, 68(%rbx) /* set zf */
   jz end_add_dn_eq_dn_plus_ea_byte
-  xorl %eax, 68(%rbx) /* unset zf */
+  xorl $4, 68(%rbx) /* set zf */
 end_add_dn_eq_dn_plus_ea_byte:
   jmpq *%r8
 
@@ -31,7 +29,8 @@ beq_local:
   jz dont_branch_beq_local
   jmpq *16384(%rax)
 dont_branch_beq_local:
-  jmpq *8(%rax)
+  addq $8, %rax
+  jmpq *%rax
 
   .globl beq
 beq:

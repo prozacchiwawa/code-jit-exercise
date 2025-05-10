@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
   uint8_t bytes[] = {
     0xd0, (2 << 3), // add instruction
     0x66, 0xfe, // beq -2
+    0x4e, 0x41, // trap 1
   };
 
   for (auto i = 0; i < sizeof(bytes); i++) {
@@ -17,7 +18,7 @@ int main(int argc, char **argv) {
   }
 
   // Put a value in memory.
-  write_byte(0x2000, 3);
+  write_byte(0x2000, 0xff);
 
   cpu_t cpu;
   cpu.d_regs[0] = 1;
