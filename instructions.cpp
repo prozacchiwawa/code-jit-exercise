@@ -147,29 +147,26 @@ void add_dn_eq_dn_plus_ea_byte::write(translation_t *translation, uint32_t page_
     uint8_t bytes[] = {
       /*0:*/	0x58, //                   	pop    %rax
       /*1:*/	0x48, 0x83, 0xe8, 0x06, //         	sub    $0x6,%rax
-      /*9:*/	0x4c, 0x8b, 0x80, 0x00, 0x40, 0x00, 0x00, //	mov    0x4000(%rax),%r8
+      /*5:*/	0x4c, 0x8b, 0x80, 0x00, 0x40, 0x00, 0x00, //	mov    0x4000(%rax),%r8
       /*c:*/	0x48, 0x89, 0xfb, //             	mov    %rdi,%rbx
-      /*12:*/	0x57, //                   	push   %rdi
-      /*13:*/	0x8b, 0x7b, 0x21, //            	mov    0x21(%rbx),%edi
-      /*16:*/	0xff, 0x53, 0x48, //            	call   *0x48(%rbx)
+      /*f:*/	0x57, //                   	push   %rdi
+      /*10:*/	0x8b, 0x7b, 0x21, //            	mov    0x21(%rbx),%edi
+      /*13:*/	0xff, 0x53, 0x48, //            	call   *0x48(%rbx)
       /*16:*/	0x5f, //                   	pop    %rdi
-      /*19:*/	0x8b, 0x53, 0x4d, //            	mov    0x4d(%rbx),%edx
+      /*17:*/	0x8b, 0x53, 0x4d, //            	mov    0x4d(%rbx),%edx
       /*1a:*/	0x83, 0x4b, 0x44, 0x04, //          	orl    $0x4,0x44(%rbx)
-      /*1a:*/	0x01, 0xd0, //                	add    %edx,%eax
-      /*20:*/	0x74, 0x04, //                	je     26 <end_add_dn_eq_dn_plus_ea_byte>
-      /*22:*/	0x83, 0x73, 0x44, 0x04, //          	xorl   $0x4,0x44(%rbx)
-      /*30:*/	0x41, 0xff, 0xe0, //            	jmp    *%r8
+      /*1e:*/	0x01, 0xd0, //                	add    %edx,%eax
+      /*20:*/	0x89, 0x43, 0x4d, //             	mov    %eax,0x4d(%rbx)
+      /*22:*/	0x74, 0x04, //                	je     26 <end_add_dn_eq_dn_plus_ea_byte>
+      /*24:*/	0x83, 0x73, 0x44, 0x04, //          	xorl   $0x4,0x44(%rbx)
+      /*28:*/	0x41, 0xff, 0xe0, //            	jmp    *%r8
     };
 
     auto target = get_overflow_code_page(sizeof(bytes));
-    // Write in 1 byte at +10 (offsetof dn)
-    // Write in 1 byte at +13 (offsetof an)
-    // Write in 1 byte at +15 (offsetof read_byte)
-    // Write in 1 byte at +33 (offsetof flags)
     memcpy(target, bytes, sizeof(bytes));
     target[0x12] = 32 + (an * 4);
     target[0x19] = dn * 4;
-    target[0x1e] = dn * 4;
+    target[0x22] = dn * 4;
 
     memcpy(translation->data_for_translation(OVERFLOW_TR, page_addr), (uint8_t *)&target, sizeof(target));
 

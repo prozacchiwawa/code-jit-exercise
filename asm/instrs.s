@@ -15,6 +15,7 @@ add_dn_eq_dn_plus_ea_byte:
   movl 77(%rbx), %edx /* read d<n> */
   orl $4, 68(%rbx)
   addl %edx, %eax
+  movl %eax, 77(%rbx) /* write d<n> */
   jz end_add_dn_eq_dn_plus_ea_byte
   xorl $4, 68(%rbx) /* set zf */
 end_add_dn_eq_dn_plus_ea_byte:
