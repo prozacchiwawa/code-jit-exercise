@@ -1,5 +1,7 @@
 # JIT Exercise
 
+(note, linux x86_64 calling convention, nothing else tested)
+
 This is an exercise to make an extremely tiny jit for an emulator with focus on communicating a few concepts:
 
 - gxemul style lazy translation, where instructions are pre-initialized to self-translate and restart.
